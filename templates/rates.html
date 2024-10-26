@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Kursy Walut</title>
+</head>
+<body>
+    <h1>Kursy walut (średnie) względem PLN z dnia {{ effective_date }}</h1>
+    <table border="1">
+        <tr>
+            <th>Waluta</th>
+            <th>Kod</th>
+            <th>Kurs średni</th>
+        </tr>
+        {% for rate in rates %}
+        <tr>
+            <td>{{ rate['currency'] }}</td>
+            <td>{{ rate['code'] }}</td>
+            <td>{{ rate['mid'] }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

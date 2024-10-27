@@ -31,13 +31,13 @@ def fetch_currency_data():
         cursor.execute(query)
         results = cursor.fetchall()
 
-        # Przetworzenie danych - konwersja daty, np. na format YYYY-MM-DD
-        processed_data = []
-        for row in results:
-            row['last_updated'] = row['last_updated'].strftime('%Y-%m-%d') if row['last_updated'] else None
-            processed_data.append(row)
-
-        return processed_data
+         # Przetworzenie danych - konwersja daty, np. na format YYYY-MM-DD
+      #  processed_data = []
+       # for row in results:
+      #      row['last_updated'] = row['last_updated'].strftime('%Y-%m-%d') if row['last_updated'] else None
+       #     processed_data.append(row)
+        currency_rates = {row['currency_code']: row['exchange_rate'] for row in results}
+        return currency_rates
 
     except mysql.connector.Error as err:
         print("Błąd połączenia z bazą danych:", err)

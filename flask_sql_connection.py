@@ -48,7 +48,26 @@ def fetch_currency_data():
         if conn.is_connected():
             cursor.close()
             conn.close()
+@app.route('/convert-currency', methotds=['GET'])
+def convert_currency():
+    from_currency = request.args.get('from_currency')
+    to_currency = request.args.get('to_currency')
+    amount = float(request,args.get('amount', 1))
 
+    currency_rates = fetch_currency_data()
+    if from_currency not in currency_rates or to_currency not in currency_rates:
+        return jsonify({"error": "Nieprawildowy kod waluty"}), 400
+
+    rate_from = currency_rates[from_currency]
+    rate_to = currency_rates[to_currency]
+    converted_amount = amout * (rate_to / rate_from)
+
+    return jsonify ({
+        "from_currency": from_currency,
+        "currency": to_currency,
+        "original_amout": amount,
+        "converted_amount": round(converted_amount, 2)
+    })
 @app.route('/currency-data', methods=['GET'])
 def get_currency_data():
     """

@@ -40,6 +40,22 @@ def get_currencies():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route('/history/<currency_code>')
+def currency_history(currency_code):
+    try:
+        historical_data = Currencies.query.filter_by(currency_code=currency_code.upper()).order_by(Currencies.date).all()
+
+        history = [{
+            'date': entry.date,
+            'exchange_rate': entry.exchange_rate
+        } for entry in historical_data]
+
+        return jsonify({'currency_code': currency_code.upper(), 'history': history})
+
+    except Exception as e:
+        return jsonify({"error": f"Nie udało się pobrać danych dla {currency_code}: {str(e)}"})
+
+
 @app.route('/show', methods=['GET'])
 def show_currencies():
     dates = db.session.query(Currencies.date).filter(Currencies.date.isnot(None)).distinct().all()
@@ -69,6 +85,59 @@ def test_db():
         return jsonify({"message": "Połączenie z bazą prawidłowe", "result": result_dict})
     except Exception as e:
         return jsonify({"error": f"Nieudane połączenie z bazą danych: {str(e)}"})
+
+
+@app.route('/show/chart', methods=['GET'])
+def show_chart():
+    currencies = db.session.query(Currencies).all()
+
+    rates_by_currency = defaultdict(list)
+    for currency in currencies:
+        if currency.exchange_rate and currency.date:
+            rates_by_currency[currency.currency_name].append(currency.exchange_rate)
+
+    stability_data = {}
+    for currency_name, rates in rates_by_currency.items():
+        if len(rates) > 1:
+            stability_data[currency_name] = variance(rates)
+
+    sorted_stability = sorted(stability_data.items(), key=lambda x: x[1])
+
+    return render_template('chart.html', stability_data=sorted_stability)
+
+
+@app.route('/show/linechart')
+def show_linechart():
+    currencies = Currencies.query.all()
+
+    currency_data = {
+        'USD': [],
+        'EUR': [],
+        'GBP': []
+    }
+    dates = []
+
+    for currency in currencies:
+        if currency.currency_code == 'USD':
+            currency_data['USD'].append(currency.exchange_rate)
+        elif currency.currency_code == 'EUR':
+            currency_data['EUR'].append(currency.exchange_rate)
+        elif currency.currency_code == 'GBP':
+            currency_data['GBP'].append(currency.exchange_rate)
+
+        if currency.date and currency.date not in dates:
+            dates.append(currency.date)
+
+    dates = [date for date in dates if date is not None]
+    dates.sort()
+
+    formatted_dates = [date.strftime('%Y/%m/%d') for date in dates]
+
+    usd_data = [currency_data['USD'][i] for i in range(len(dates))]
+    eur_data = [currency_data['EUR'][i] for i in range(len(dates))]
+    gbp_data = [currency_data['GBP'][i] for i in range(len(dates))]
+
+    return render_template('linechart.html', dates=formatted_dates, usd_data=usd_data, eur_data=eur_data, gbp_data=gbp_data)
 
 
 @app.route('/history/<currency_code>')

@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Currency Exchange Rates Over Time</h1>
+
+<canvas id="lineChart" width="800" height="500"></canvas>
+
+<script>
+    const ctx = document.getElementById('lineChart').getContext('2d');
+    const lineChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: {{ dates | tojson }},
+            datasets: [
+                {
+                    label: 'USD',
+                    data: {{ usd_data | tojson }},
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    fill: false,
+                    tension: 0.1
+                },
+                {
+                    label: 'EUR',
+                    data: {{ eur_data | tojson }},
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    fill: false,
+                    tension: 0.1
+                },
+                {
+                    label: 'GBP',
+                    data: {{ gbp_data | tojson }},
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    fill: false,
+                    tension: 0.1
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Zmiana w czasie'
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false
+                }
+            },
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Data'
+                    }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Wartość'
+                    },
+                    min: 3,
+                    ticks: {
+                        stepSize: 0.1
+                    }
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

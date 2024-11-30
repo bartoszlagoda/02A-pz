@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Wynik przeliczenia</h1>
+<p>Przeliczona kwota:</p>
+<ul>
+    <li>Kwota: {{ amount }}</li>
+    <li>Waluta źródłowa: {{ from_currency }}</li>
+    <li>Waluta docelowa: {{ to_currency }}</li>
+    <li>Przeliczona kwota: {{ converted_amount }}</li>
+    <li>Data kursu: {{ rate_date }}</li>
+</ul>
+<a href="/convert" class="btn btn-secondary">Wróć</a>
+{% endblock %}

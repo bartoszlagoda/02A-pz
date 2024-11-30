@@ -156,6 +156,7 @@ def currency_history(currency_code):
     except Exception as e:
         return jsonify({"error": f"Nie udało się pobrać danych dla {currency_code}: {str(e)}"})
 
+
 @app.route('/get/<release_date>', methods=['GET'])
 def get_legacy_data(release_date):
     try:
@@ -181,6 +182,43 @@ def get_legacy_data(release_date):
         return jsonify({"message": "Waluty zapisane dla daty " + release_date})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
+@app.route('/convert', methods=['GET', 'POST'])
+def convert_currency():
+    from flask import request
+
+    if request.method == 'POST':
+        amount = request.form.get('amount', type=float)
+        from_currency = request.form.get('from_currency', type=str).upper()
+        to_currency = request.form.get('to_currency', type=str).upper()
+        date = datetime.now().date()
+
+        if not amount or not from_currency or not to_currency:
+            return jsonify({"error": "Podaj poprawne dane: amount, from_currency i to_currency."}), 400
+
+        try:
+            from_rate_entry = Currencies.query.filter(Currencies.currency_code == from_currency, Currencies.date.isnot(None)).order_by(Currencies.date.desc()).first()
+            to_rate_entry = Currencies.query.filter(Currencies.currency_code == to_currency, Currencies.date.isnot(None)).order_by(Currencies.date.desc()).first()
+
+            if not from_rate_entry or not to_rate_entry:
+                return jsonify({"error": "Brak danych kursowych dla podanych walut."}), 404
+
+            pln_amount = amount / from_rate_entry.exchange_rate
+            converted_amount = pln_amount * to_rate_entry.exchange_rate
+
+            return render_template(
+                'convert_result.html',
+                amount=amount,
+                from_currency=from_currency,
+                to_currency=to_currency,
+                converted_amount=round(converted_amount, 2),
+                rate_date=str(to_rate_entry.date)
+            )
+        except Exception as e:
+            return jsonify({"error": f"Wystąpił błąd: {str(e)}"}), 500
+
+    return render_template('convert.html')
 
 
 if __name__ == '__main__':

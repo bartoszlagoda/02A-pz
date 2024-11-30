@@ -157,6 +157,25 @@ def currency_history(currency_code):
         return jsonify({"error": f"Nie udało się pobrać danych dla {currency_code}: {str(e)}"})
 
 
+
+@app.route('/data/array')
+def get_data_array():
+    currencies = Currencies.query.all()
+
+    data_array = []
+    for currency in currencies:
+        data_array.append([
+            currency.currency_name,
+            currency.currency_code,
+            currency.exchange_rate,
+            str(currency.date)
+        ])
+
+    array_string = str(data_array)
+
+    return Response(array_string, mimetype='text/plain')
+
+
 @app.route('/get/<release_date>', methods=['GET'])
 def get_legacy_data(release_date):
     try:

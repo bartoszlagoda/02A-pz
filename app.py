@@ -240,13 +240,13 @@ def convert_currency():
     return render_template('convert.html')
 
 
-    @app.route('/download/<filename>')
-    def download_file(filename):
-        return send_from_directory(
-            'static/downloads',
-            filename,
-            as_attachment=True
-        )
+@app.route('/download/<filename>')
+def download_file(filename):
+    return send_from_directory(
+        'static/downloads',
+        filename,
+        as_attachment=True
+    )
 
 
 if __name__ == '__main__':
